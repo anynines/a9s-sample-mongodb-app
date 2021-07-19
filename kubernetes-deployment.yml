@@ -1,0 +1,28 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: a9s-sample-mongodb-app
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: a9s-sample-mongodb-app
+        tier: frontend
+    spec:
+      containers:
+        - name: a9s-sample-mongodb-app
+          image: avarteqgmbh/a9s-sample-mongodb-app:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: "MONGODB_URI"
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-binding
+                  key: uri
+            - name: "MONGODB_DATABSE"
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-binding
+                  key: database

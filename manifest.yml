@@ -1,0 +1,9 @@
+applications:
+  - name: mongodb-app
+    memory: 128M
+    instances: 1
+    random-route: true
+    path: .
+    buildpack: https://github.com/cloudfoundry/go-buildpack
+    env:
+      GOPACKAGENAME: mongodb-app

@@ -1,0 +1,30 @@
+{{define "title"}}<title>MongoDB Demo</title>{{end}}
+{{define "body"}}
+
+<div class="page__container">
+
+	<div class="page__header">
+		<h1>Blog</h1>
+		<div class="actions">
+			<a class="btn btn-primary" href="/blog-posts/new" >Create Post</a>
+		</div>
+	</div>
+
+	<div class="page__body">
+		<div class="posts">
+
+			{{range $idx, $blogpost := . }}
+				<div class="post">
+					<h2>{{$blogpost.Title}}</h2>
+					<div class="post-body">
+						{{$blogpost.Description}}
+					</div>
+				</div>
+			{{end}}
+
+		</div>
+	</div>
+
+</div>
+
+{{end}}

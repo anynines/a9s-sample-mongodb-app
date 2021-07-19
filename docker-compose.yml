@@ -1,0 +1,20 @@
+version: "2.1"
+
+services:
+  a9s-sample-mongodb-app:
+    image: avarteqgmbh/a9s-sample-mongodb-app
+    build: .
+    depends_on:
+      - mongo
+    ports:
+      - 3000:3000
+    environment:
+      MONGODB_URI: mongodb://mongodb:anynines@mongo:27017/mongodb
+      MongoDB_DATABASE: mongodb
+  mongo:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodb
+      MONGO_INITDB_ROOT_PASSWORD: anynines
+      MONGO_INITDB_DATABASE: mongodb
