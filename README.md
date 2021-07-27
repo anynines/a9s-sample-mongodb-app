@@ -2,9 +2,9 @@
 
 This is a sample app to check whether the a9s Data Service Automation for MongoDB service is working or not.
 
-## Install, push and bind
+## Install, Push and Bind
 
-Make sure you installed GO on your machine, [download this](https://golang.org/doc/install?download=go1.16.darwin-amd64.pkg) for mac.
+Make sure you installed Go on your machine, [download this](https://golang.org/doc/install?download=go1.16.darwin-amd64.pkg) for macOS.
 
 Clone the repository
 ```
