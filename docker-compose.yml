@@ -9,12 +9,12 @@ services:
     ports:
       - 3000:3000
     environment:
-      MONGODB_URI: mongodb://mongodb:anynines@mongo:27017/mongodb
-      MongoDB_DATABASE: mongodb
+      MONGODB_URI: mongodb://anynines:password@mongo:27017/mongodb
+      MONGODB_DATABASE: mongodb
   mongo:
     image: mongo:latest
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: mongodb
-      MONGO_INITDB_ROOT_PASSWORD: anynines
       MONGO_INITDB_DATABASE: mongodb
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
