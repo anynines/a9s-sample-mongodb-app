@@ -7,3 +7,5 @@ applications:
     buildpack: https://github.com/cloudfoundry/go-buildpack
     env:
       GOPACKAGENAME: mongodb-app
+    services:
+      - ((service))
