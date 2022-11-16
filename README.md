@@ -26,7 +26,7 @@ If so, push the app with binding the service
 $ cf push --var service=mymongodb
 ```
 
-At last check the created url...
+Lastly, check the created url...
 
 
 ## Local test using Docker
