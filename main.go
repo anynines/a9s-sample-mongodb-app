@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -21,10 +22,8 @@ type MongoDBCredentials struct {
 }
 
 // struct for reading env
-type VCAPServices struct {
-	MongoDB []struct {
-		Credentials MongoDBCredentials `json:"credentials"`
-	} `json:"mongodb40"`
+type VCAPServices map[string][]struct {
+	Credentials MongoDBCredentials `json:"credentials"`
 }
 
 type BlogPost struct {
@@ -67,14 +66,29 @@ func getCredentials() (MongoDBCredentials, error) {
 		return credentials, nil
 	}
 
-	var s VCAPServices
-	err := json.Unmarshal([]byte(os.Getenv("VCAP_SERVICES")), &s)
+	var servicesMap VCAPServices
+	err := json.Unmarshal([]byte(os.Getenv("VCAP_SERVICES")), &servicesMap)
 	if err != nil {
 		log.Println(err)
 		return MongoDBCredentials{}, err
 	}
 
-	return s.MongoDB[0].Credentials, nil
+	for serviceName, serviceVarList := range servicesMap {
+		if !strings.Contains(serviceName, "a9s-mongodb") {
+			continue
+		}
+		if len(serviceVarList) == 0 {
+			err = fmt.Errorf("empty list of variables for service %v in env variables", serviceName)
+			log.Println(err)
+			return MongoDBCredentials{}, err
+		}
+		log.Printf("Using creds from env for service: %v ", serviceName)
+		return serviceVarList[0].Credentials, nil
+	}
+
+	err = fmt.Errorf("no matching list environment variables found for mongodb service")
+	log.Println(err)
+	return MongoDBCredentials{}, err
 }
 
 func renderTemplate(w http.ResponseWriter, name string, template string, viewModel interface{}) {
