@@ -5,7 +5,7 @@ applications:
     random-route: true
     path: .
     buildpack: https://github.com/cloudfoundry/go-buildpack
+    services:
+      - mab-mongodb-test
     env:
       GOPACKAGENAME: mongodb-app
-    services:
-      - ((service))

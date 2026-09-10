@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -19,6 +21,7 @@ import (
 type MongoDBCredentials struct {
 	Database string `json:"default_database"`
 	Uri      string `json:"uri"`
+	Cacrt    string `json:"cacrt"`
 }
 
 // struct for reading env
@@ -106,15 +109,27 @@ func GetCollection() (*mongo.Collection, error) {
 	}
 
 	clientOptions := options.Client().ApplyURI(credentials.Uri)
+
+	// a9s nodes use certificates signed by a private CA delivered in the binding.
+	if credentials.Cacrt != "" {
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM([]byte(credentials.Cacrt)) {
+			err := fmt.Errorf("failed to parse cacrt from service credentials")
+			log.Println(err)
+			return nil, err
+		}
+		clientOptions.SetTLSConfig(&tls.Config{RootCAs: pool})
+	}
+
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
@@ -126,12 +141,12 @@ func GetCollection() (*mongo.Collection, error) {
 func clearDatabase(w http.ResponseWriter, r *http.Request) {
 	collection, err := GetCollection()
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if err = collection.Drop(context.TODO()); err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -148,7 +163,7 @@ func createBlogPost(w http.ResponseWriter, r *http.Request) {
 
 	collection, err := GetCollection()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 
@@ -169,7 +184,7 @@ func renderBlogPosts(w http.ResponseWriter, r *http.Request) {
 
 	collection, err := GetCollection()
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -178,6 +193,8 @@ func renderBlogPosts(w http.ResponseWriter, r *http.Request) {
 	cursor, err := collection.Find(context.TODO(), bson.M{})
 	if err != nil {
 		fmt.Println("Finding all documents ERROR:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	for cursor.Next(context.TODO()) {
